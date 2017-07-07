@@ -1,10 +1,11 @@
 import fs from 'fs'
 
+// file resource for a RESTful API
 class RESTFile {
 
   static storageRoot() { return './files' }
 
-  // load core data for RESTFile I/O
+  // load any necessary data to interact with the collection
   static initialize() {
 
     const indexPath = RESTFile.storageRoot() + '/index.json'
@@ -17,7 +18,7 @@ class RESTFile {
 
   }
 
-  // done with I/O, save core data to disk
+  // save any additional collection data
   static deinitialize() {
 
     const indexPath = RESTFile.storageRoot() + '/index.json'
@@ -26,10 +27,10 @@ class RESTFile {
 
   }
 
-  // list all the collection's resources
-  // only list collection IDs, since the full contents of all files would be too large
+  // list the collection's resources
   static enumerate() {
 
+    // only list collection IDs, since the full contents of all files would be too large
     return Object.keys(RESTFile.indexJSON)
 
   }
