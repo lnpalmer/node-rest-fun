@@ -16,47 +16,67 @@ const router = express.Router()
 
 // collection-level actions
 router.route('/files')
+
   .get((req, res) => { // GET - get a list of all resources
+    try {
 
-    res.json(RESTFile.enumerate())
+      res.json(RESTFile.enumerate())
 
+    }
+    catch(err) { res.json({ error: err.message }) }
   })
+
   .post((req, res) => { // POST - add a new resource
+    try {
 
-    const id = uuidV1()
-    const { fileName, data, metadata } = req.body
-    const restFile = new RESTFile(id, fileName, data, metadata)
-    restFile.save()
+      const id = uuidV1()
+      const { fileName, data } = req.body
+      const restFile = new RESTFile(id, fileName, data)
+      restFile.save()
 
-    // send the ID of the newly created resource to the client
-    res.json({ message: "file created", id: id })
+      // send the ID of the newly created resource to the client
+      res.json({ message: "file created", id: id })
 
+    }
+    catch(err) { res.json({ error: err.message }) }
   })
 
 // resource-level actions
 router.route('/files/:file_id')
-  .get((req, res) => { // GET - get an individial resource
 
-    const id = req.params.file_id
-    res.json(RESTFile.load(id))
+  .get((req, res) => { // GET - get an individual resource
+    try {
 
+      const id = req.params.file_id
+      res.json(RESTFile.load(id))
+
+    }
+    catch(err) { res.json({ error: err.message }) }
   })
+
   .put((req, res) => { // PUT - update a resource
+    try {
 
-    const id = req.params.file_id
-    const { fileName, data, metadata } = req.body
-    const restFile = new RESTFile(id, fileName, data, metadata)
-    restFile.update()
+      const id = req.params.file_id
+      const { fileName, data } = req.body
+      const restFile = new RESTFile(id, fileName, data)
 
-    res.json({ message: "file updated" })
+      restFile.update()
+      res.json({ message: "file updated" })
 
+    }
+    catch(err) { res.json({ error: err.message }) }
   })
-  .delete((req, res) => { // DELETE - remove a resource from the collection 
 
-    const id = req.params.file_id
-    RESTFile.remove(id)
-    res.json({ message: "file deleted" })
+  .delete((req, res) => { // DELETE - remove a resource from the collection
+    try {
 
+      const id = req.params.file_id
+      RESTFile.remove(id)
+      res.json({ message: "file deleted" })
+
+    }
+    catch(err) { res.json({ error: err.message }) }
   })
 
 

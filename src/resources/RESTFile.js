@@ -1,9 +1,7 @@
-import fs from 'fs'
+import fs from 'fs-extra'
 
 // file resource for a RESTful API
 class RESTFile {
-
-  static storageRoot() { return './files' }
 
   // load any necessary data to interact with the collection
   static initialize() {
@@ -15,6 +13,8 @@ class RESTFile {
     } else {
       RESTFile.indexJSON = {}
     }
+
+    if (!fs.existsSync(RESTFile.storageRoot())) fs.mkdirSync(RESTFile.storageRoot())
 
   }
 
@@ -46,42 +46,58 @@ class RESTFile {
 
   }
 
-  // remove the RESTFile with id [id]
+  // remove the RESTFile with id {id}
   static remove(id) {
 
     delete RESTFile.indexJSON[id]
-    rimraf(RESTFile.storageRoot() + '/' + id, error => {
-      console.log('[rimraf] error: ' + error)
-    })
+    fs.removeSync(RESTFile.storageRoot() + '/' + id)
 
   }
 
   // save the RESTFile to the data backend
   save() {
 
-    RESTFile.indexJSON[this.id] = {
-      id: this.id,
-      fileName: this.fileName
-    }
+    const fileDir = this.fileDir()
+    if (!fs.existsSync(fileDir)) fs.mkdirSync(fileDir)
 
-    fs.mkdirSync(RESTFile.storageRoot() + '/' + this.id)
     fs.writeFileSync(
       RESTFile.storageRoot() + '/' + this.id + '/' + this.fileName,
       new Buffer(this.data, 'base64')
     )
 
+    RESTFile.indexJSON[this.id] = {
+      id: this.id,
+      fileName: this.fileName
+    }
+
   }
 
   // update a RESTFile
-  update() { this.save() }
+  update() {
 
-  constructor(id, fileName, data64) {
+    fs.unlinkSync(this.filePath())
+
+    this.save()
+
+  }
+
+  constructor(id, fileName, data) {
 
     this.id = id
     this.fileName = fileName
-    this.data = data64
+    // resource data is base64 encoded outside of the file system
+    this.data = data
 
   }
+
+  // root for file storage
+  static storageRoot() { return './files' }
+
+  // directory for an individual file
+  fileDir() { return RESTFile.storageRoot() + '/' + this.id }
+
+  // path for an individual file
+  filePath() { return this.fileDir() + '/' + RESTFile.indexJSON[this.id].fileName }
 
 }
 
