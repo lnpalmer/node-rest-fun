@@ -57,6 +57,8 @@ class RESTFile {
   // save the RESTFile to the data backend
   save() {
 
+    console.log("saving file! file name: " + this.fileName)
+
     const fileDir = this.fileDir()
     if (!fs.existsSync(fileDir)) fs.mkdirSync(fileDir)
 

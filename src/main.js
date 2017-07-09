@@ -1,5 +1,7 @@
+import https from 'https'
 import express from 'express'
 import bodyParser from 'body-parser'
+import fs from 'fs-extra'
 const uuidV1 = require('uuid/v1')
 
 import RESTFile from './resources/RESTFile'
@@ -7,9 +9,9 @@ RESTFile.initialize()
 
 // set up express
 const app = express()
-app.use(bodyParser.urlencoded({ extended: true }))
+app.use(bodyParser.urlencoded({ limit: '3mb', extended: true }))
 
-const port = process.env.port || 8080
+const port = process.env.port || 8443
 const router = express.Router()
 
 // set up route for file collection
@@ -18,6 +20,7 @@ const router = express.Router()
 router.route('/files')
 
   .get((req, res) => { // GET - get a list of all resources
+    console.log("getting index!")
     try {
 
       res.json(RESTFile.enumerate())
@@ -79,10 +82,17 @@ router.route('/files/:file_id')
     catch(err) { res.json({ error: err.message }) }
   })
 
-
-// listen for incoming requests
 app.use('/api', router)
-app.listen(port)
+
+// configure HTTPS and listen for incoming requests
+var httpsOptions = {
+  key: fs.readFileSync('ssl/key.pem'),
+  ca: fs.readFileSync('ssl/csr.pem'),
+  cert: fs.readFileSync('ssl/cert.pem')
+}
+https.createServer(httpsOptions, app).listen(port, '', null, () => {
+  console.log('server listening on port ' + port)
+})
 
 // save shared collection data upon exit
 process.on('SIGINT', () => {

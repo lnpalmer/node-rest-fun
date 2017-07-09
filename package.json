@@ -5,7 +5,8 @@
   "main": "dist/main.js",
   "scripts": {
     "build": "rimraf dist/ && babel src -d dist",
-    "start": "node dist/main.js"
+    "start": "node dist/main.js",
+    "ssl": "sh ssl-gen.sh"
   },
   "repository": {
     "type": "git",
